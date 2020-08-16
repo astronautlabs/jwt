@@ -25,3 +25,5 @@ export class NodeJWT implements JWT {
     }
 
 }
+
+export function createJWTEngine() : JWT { return new NodeJWT(); };

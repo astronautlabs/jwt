@@ -1,7 +1,7 @@
 {
   "name": "@astronautlabs/jwt",
   "version": "1.0.0",
-  "description": "",
+  "description": "An isomorphic JWT library (works in browser and Node.js)",
   "main": "dist/node/index.js",
   "browser": "dist/browser/index.js",
   "scripts": {
