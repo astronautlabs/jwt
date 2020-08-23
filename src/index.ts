@@ -1,5 +1,5 @@
-import { JWT } from './common';
+import { JWTEngine } from './common';
 
 export * from './common';
 
-export function createJWTEngine() : JWT { throw new Error('No implementation selected'); };
+export function createJWTEngine() : JWTEngine { throw new Error('No implementation selected'); };

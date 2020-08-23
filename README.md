@@ -18,12 +18,10 @@ npm install @astronautlabs/jwt
 ## Signing
 
 ```typescript
-import { createJWTEngine } from '@astronautlabs/jwt';
-
-let jwt = createJWTEngine();
+import { JWT } from '@astronautlabs/jwt';
 
 try {
-    let token = await jwt.sign({ sub: 123 }, { algorithm: 'HS256', secretOrKey: 'stuff' });
+    let token = await JWT.sign({ sub: 123 }, { algorithm: 'HS256', secretOrKey: 'stuff' });
     console.dir(token); // => { string: 'eY...', claims: { sub: ..., ... } }
 } catch (e) {
     console.error('Failed to validate token: ');
@@ -35,12 +33,10 @@ try {
 ## Validation
 
 ```typescript
-import { createJWTEngine } from '@astronautlabs/jwt';
-
-let jwt = createJWTEngine();
+import { JWT } from '@astronautlabs/jwt';
 
 try {
-    let token = await jwt.validate(`eY...`, { algorithm: 'HS256', secretOrKey: 'stuff' });
+    let token = await JWT.validate(`eY...`, { algorithm: 'HS256', secretOrKey: 'stuff' });
     console.dir(token); // => { string: 'eY...', claims: { sub: ..., ... } }
 } catch (e) {
     console.error('Failed to validate token: ');

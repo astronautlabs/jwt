@@ -1,6 +1,6 @@
 import { suite } from 'razmin';
 import { expect } from 'chai';
-import { JWT } from './common';
+import { JWTEngine } from './common';
 
 let SAMPLE_TOKEN_HS256 = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`;
 let SAMPLE_TOKEN_HS256_INVALID = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_SNEAKYssw5c`;
@@ -87,7 +87,7 @@ EZFf9T6VsMw+7sUFo88gTDL9BK6IBcsYDr5I7QfN5WkXbsrx/s9Yll7urISU3z7o
 eUhPf0cYfvNPR4eQb5FLLrDX
 -----END PRIVATE KEY-----`;
 
-export function engineTest(subjectName : string, engine : JWT) {
+export function engineTest(subjectName : string, engine : JWTEngine) {
     suite(describe => {
         describe(subjectName, it => {
             describe(': Algorithm=HS256', it => {

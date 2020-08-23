@@ -1,4 +1,4 @@
 import { engineTest } from "../engine.test";
-import { createJWTEngine } from "./index";
+import { JWT } from "./index";
 
-engineTest('WebCryptoJWT', createJWTEngine());
+engineTest('WebCryptoJWT', JWT);

@@ -1,9 +1,9 @@
-import { JWT, EncodeOptions, Token, DecodeOptions } from "../common/interface";
+import { JWTEngine, EncodeOptions, Token, DecodeOptions } from "../common/interface";
 import * as jsonwebtoken from 'jsonwebtoken';
 import { Base64URL } from "../browser/base64url";
 export * from '../common';
 
-export class NodeJWT implements JWT {
+export class NodeJWT implements JWTEngine {
     async encode(claims: Record<string, any>, options: EncodeOptions): Promise<Token> {
         let string = jsonwebtoken.sign(claims, options.secretOrKey, {
             algorithm: <any>options.algorithm
@@ -28,4 +28,5 @@ export class NodeJWT implements JWT {
 
 }
 
-export function createJWTEngine() : JWT { return new NodeJWT(); };
+export function createJWTEngine() : JWTEngine { return new NodeJWT(); };
+export const JWT = createJWTEngine();

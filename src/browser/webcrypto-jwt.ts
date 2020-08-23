@@ -2,7 +2,7 @@
 // (C) Copyright (c) 2015 Alberto Pose albertopose@gmail.com
 // Used under the terms of the MIT License (https://github.com/pose/webcrypto-jwt/blob/master/LICENSE.md)
 
-import { JWT, EncodeOptions, Token, DecodeOptions, Options, DecodedToken } from "../common/interface";
+import { JWTEngine, EncodeOptions, Token, DecodeOptions, Options, DecodedToken } from "../common/interface";
 import { Base64URL } from "./base64url";
 import { Utils } from "./utils";
 
@@ -18,7 +18,7 @@ const ALGORITHMS = {
     }
 };
 
-export class WebCryptoJWT implements JWT {
+export class WebCryptoJWT implements JWTEngine {
     constructor(
         private subtleCrypto? : SubtleCrypto
     ) {
