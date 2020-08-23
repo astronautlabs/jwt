@@ -9,12 +9,35 @@ import { Utils } from "./utils";
 const ALGORITHMS = {
     none: {},
     HS256: {
-        name: 'HMAC',
-        hash: 'SHA-256'
+        importKey: { 
+            name: 'HMAC',
+            hash: 'SHA-256'
+        },
+        operation: {
+            name: 'HMAC',
+            hash: 'SHA-256'
+        }
     },
     RS256: {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: 'SHA-256'
+        importKey: {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: 'SHA-256'
+        },
+        operation: {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: 'SHA-256'
+        }
+    },
+    ES256: {
+        importKey: {
+            name: 'ECDSA',
+            namedCurve: 'P-256',
+            hash: 'SHA-256'
+        },
+        operation: {
+            name: 'ECDSA',
+            hash: 'SHA-256'
+        }
     }
 };
 
@@ -115,7 +138,7 @@ export class WebCryptoJWT implements JWTEngine {
             key = await this.subtleCrypto.importKey(
                 keyFormat,
                 secretBuf,
-                importAlgorithm,
+                importAlgorithm.importKey,
                 false,
                 ['verify']
             );
@@ -135,7 +158,7 @@ export class WebCryptoJWT implements JWTEngine {
         
         try {
             return await this.subtleCrypto.verify(
-                importAlgorithm.name,
+                importAlgorithm.operation,
                 key,
                 signatureAsUint8Array,
                 messageAsUint8Array
@@ -186,7 +209,7 @@ export class WebCryptoJWT implements JWTEngine {
             key = await this.subtleCrypto.importKey(
                 keyFormat,
                 secretBuf,
-                importAlgorithm,
+                importAlgorithm.importKey,
                 false,
                 ['sign']
             )
@@ -202,7 +225,7 @@ export class WebCryptoJWT implements JWTEngine {
         
         try {
             signature = await this.subtleCrypto.sign(
-                importAlgorithm.name,
+                importAlgorithm.operation,
                 key,
                 messageAsUint8Array
             );
