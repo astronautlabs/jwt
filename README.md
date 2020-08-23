@@ -1,5 +1,9 @@
 # @/jwt
 
+> This library is **Alpha quality** in the `0.0.x` series (no automatic updates 
+> by semver). Please take caution if you choose to use it, and do not use it 
+> in production. We welcome PRs for fixes, features and general improvements.
+
 A simple isomorphic JWT library (works in browser and Node.js) with support for 
 signing and verifying JWTs using the `HS256` and `RS256` algorithms.
 
