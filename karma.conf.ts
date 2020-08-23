@@ -5,8 +5,10 @@ export = function (config : karma.Config) {
     config.set(<karma.ConfigOptions & { webpack }>{
         basePath: '',
         files: [
-            { pattern: 'src/**/*.test.ts' }
+            { pattern: 'src/*.test.ts' },
+            { pattern: 'src/browser/**/*.test.ts' }
         ],
+        browsers: ['Chrome'],
 
         preprocessors: {
             '**/*.test.ts': ['webpack']

@@ -1,5 +1,7 @@
 import { suite } from "razmin";
 suite()
-    .include(['**/*.test.js'])
+    .include([
+        'node/**/*.test.js'
+    ])
     .run()
 ;

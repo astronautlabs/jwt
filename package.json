@@ -6,8 +6,9 @@
   "browser": "dist/browser/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "test": "npm run build && node dist/test",
-    "karma": "karma start"
+    "test": "npm run karma:run && npm run test:node",
+    "test:node": "npm run build && node dist/test",
+    "test:browser": "karma start --single-run"
   },
   "author": "",
   "license": "MIT",
