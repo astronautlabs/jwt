@@ -9,6 +9,7 @@
     "test": "npm run test:browser && npm run test:node",
     "test:node": "npm run build && node dist/test",
     "test:browser": "karma start --single-run",
+    "karma": "karma start",
     "prepublish": "npm run test"
   },
   "author": "",
