@@ -6,7 +6,6 @@ export class Utils {
     }
 
     public static utf8ToUint8Array(str) {
-        var chars = [];
         str = btoa(unescape(encodeURIComponent(str)));
         return Base64URL.parse(str);
     }

@@ -6,22 +6,34 @@
   "browser": "dist/browser/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "test": "npm run build && node dist/test"
+    "test": "npm run build && node dist/test",
+    "karma": "karma start"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.12",
     "@types/jsonwebtoken": "^8.5.0",
+    "@types/karma": "^5.0.0",
     "@types/node": "14.0.4",
     "atob": "^2.1.2",
     "chai": "^4.2.0",
-    "razmin": "^0.6.13",
-    "typescript": "^3.9.7"
+    "karma": "^5.1.1",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-typescript": "^5.1.0",
+    "karma-webpack": "^4.0.2",
+    "razmin": "^0.6.16",
+    "ts-loader": "^8.0.2",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "zone.js": "^0.11.1"
   },
   "dependencies": {
     "@trust/webcrypto": "^0.9.2",
     "btoa": "^1.2.1",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "karma-jasmine": "^4.0.1"
   }
 }

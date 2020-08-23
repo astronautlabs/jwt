@@ -6,6 +6,18 @@ import { JWT, EncodeOptions, Token, DecodeOptions, Options, DecodedToken } from 
 import { Base64URL } from "./base64url";
 import { Utils } from "./utils";
 
+const ALGORITHMS = {
+    none: {},
+    HS256: {
+        name: 'HMAC',
+        hash: 'SHA-256'
+    },
+    RS256: {
+        name: 'RSASSA-PKCS1-v1_5',
+        hash: 'SHA-256'
+    }
+};
+
 export class WebCryptoJWT implements JWT {
     constructor(
         private subtleCrypto? : SubtleCrypto
@@ -36,7 +48,7 @@ export class WebCryptoJWT implements JWT {
         let algorithm = this.algorithmOf(options);
         let secretOrKey = options.secretOrKey;
 
-        if (algorithm !== 'None' && !(await this._verify(decodedToken, secretOrKey, algorithm)))
+        if (algorithm !== 'none' && !(await this._verify(decodedToken, secretOrKey, algorithm)))
             throw new Error(`Cannot validate JWT '${string}': Invalid signature`);
 
         return {
@@ -49,6 +61,15 @@ export class WebCryptoJWT implements JWT {
         return options.algorithm || 'HS256';
     }
 
+    private str2ab(str : string) {
+        const buf = new ArrayBuffer(str.length);
+        const bufView = new Uint8Array(buf);
+        for (let i = 0, strLen = str.length; i < strLen; i++) {
+            bufView[i] = str.charCodeAt(i);
+        }
+        return buf;
+    }
+
     /**
      * Adapted from https://chromium.googlesource.com/chromium/blink/+/master/LayoutTests/crypto/subtle/hmac/sign-verify.html
      * 
@@ -57,68 +78,79 @@ export class WebCryptoJWT implements JWT {
      * @param alg 
      */
     private async _verify(token : DecodedToken, secret : string, alg : string): Promise<boolean> {
-        if (alg === 'None')
+        if (alg === 'none')
             return true;
         
-        let algorithms = {
-            HS256: {
-                name: 'HMAC',
-                hash: {
-                    name: 'SHA-256'
-                }
-            }
-        };
-
-        let importAlgorithm = algorithms[alg];
+        let importAlgorithm = ALGORITHMS[alg];
         if (!importAlgorithm)
             throw new Error(`Algorithm ${alg} is not supported`);
 
-        // TODO Test utf8ToUint8Array function
-        let keyData = Utils.utf8ToUint8Array(secret);
+        let keyFormat : string;
+        let secretBuf : ArrayBuffer;
+        let encoder = new TextEncoder();
 
-        let key = await this.subtleCrypto.importKey(
-            'raw',
-            keyData,
-            importAlgorithm,
-            false,
-            ['sign']
-        );
+        // TODO Test utf8ToUint8Array function
+        if (secret.includes('-----BEGIN PUBLIC KEY-----')) {
+            secretBuf = this.str2ab(atob(
+                secret
+                    .replace(/^-----BEGIN PUBLIC KEY-----\n/, '')
+                    .replace(/\n-----END PUBLIC KEY-----/, '')
+                    .replace(/\n/g, '')
+            ));
+            keyFormat = 'spki';
+        } else if (secret.includes('-----BEGIN RSA PUBLIC KEY-----')) {
+            throw new Error(
+                `PKCS#1 keys are not supported. ` 
+                + `Please convert the key to PKCS#8 instead: ` 
+                + `openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in pkcs1.key -out pkcs8.key`
+            );
+        } else {
+            secretBuf = encoder.encode(secret);
+            keyFormat = 'raw';
+        }
+
+        let key : CryptoKey;
+        
+        try {
+            key = await this.subtleCrypto.importKey(
+                keyFormat,
+                secretBuf,
+                importAlgorithm,
+                false,
+                ['verify']
+            );
+        } catch (e) {
+            console.error(`JWT.verify(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm)}`);
+            console.error(e);
+            throw e;
+        }
 
         let partialToken = `${token.encodedHeader}.${token.encodedPayload}`;
         let signaturePart = token.signature;
 
         // TODO Test utf8ToUint8Array function
-        let messageAsUint8Array = Utils.utf8ToUint8Array(partialToken);
+        let messageAsUint8Array = encoder.encode(partialToken);
         // TODO Test utf8ToUint8Array function
-        let signatureAsUint8Array = Utils.utf8ToUint8Array(signaturePart);
+        let signatureAsUint8Array = Base64URL.parse(signaturePart);
         
-        let result = await this.subtleCrypto.sign(
-            importAlgorithm.name,
-            key,
-            messageAsUint8Array
-        );
-
-        // TODO Test
-        let resBase64 = Base64URL.stringify(new Uint8Array(result));
-
-        // TODO Time comparison
-        return resBase64 === signaturePart;
+        try {
+            return await this.subtleCrypto.verify(
+                importAlgorithm.name,
+                key,
+                signatureAsUint8Array,
+                messageAsUint8Array
+            );
+        } catch (e) {
+            console.error(`JWT.verify(): Caught error while verifying token:`);
+            console.error(e);
+            throw e;
+        }
     };
 
     private async _sign(payload : Record<string,any>, secret : string, alg : string): Promise<string> {
-        let algorithms = {
-            HS256: {
-                name: 'HMAC',
-                hash: {
-                    name: 'SHA-256'
-                }
-            }
-        };
-
-        let importAlgorithm = algorithms[alg];
-
+        let importAlgorithm = ALGORITHMS[alg];
         if (!importAlgorithm)
-            throw new Error('algorithm not found');
+            throw new Error(`Algorithm '${alg}' is not supported`);
 
         let payloadAsJSON = JSON.stringify(payload);
         let header = { alg: alg, typ: 'JWT' };
@@ -126,39 +158,63 @@ export class WebCryptoJWT implements JWT {
         let partialToken = Base64URL.stringify(Utils.utf8ToUint8Array(headerAsJSON)) + '.' +
             Base64URL.stringify(Utils.utf8ToUint8Array(payloadAsJSON));
 
+        if (alg === 'none')
+            return `${partialToken}.`;
+
+        let keyFormat = 'raw';
+        let encoder = new TextEncoder();
+        let secretBuf : ArrayBuffer;
+
         // TODO Test utf8ToUint8Array function
-        let keyData = Utils.utf8ToUint8Array(secret);
-
-        let key = await this.subtleCrypto.importKey(
-            'raw',
-            keyData,
-            importAlgorithm,
-            false,
-            ['sign']
-        )
-        let characters = payloadAsJSON.split('');
-        let it = Utils.utf8ToUint8Array(payloadAsJSON).entries();
-        let i = 0;
-        let result = [];
-        let current;
-
-        while (!(current = it.next()).done) {
-            result.push([current.value[1], characters[i]]);
-            i++;
+        if (secret.includes('-----BEGIN RSA PRIVATE KEY-----')) {
+            throw new Error(`PKCS#1 keys are not supported. Please convert the key to PKCS#8 instead: openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in pkcs1.key -out pkcs8.key`);
+        } else if (secret.includes('-----BEGIN PRIVATE KEY-----')) {
+            secretBuf = this.str2ab(atob(
+                secret
+                    .replace(/^-----BEGIN PRIVATE KEY-----\n/, '')
+                    .replace(/\n-----END PRIVATE KEY-----/, '')
+                    .replace(/\n/g, '')
+            ));
+            keyFormat = 'pkcs8';
+        } else {
+            secretBuf = encoder.encode(secret);
         }
 
-        // TODO Test utf8ToUint8Array function
+        let key : CryptoKey;
+        
+        try {
+            key = await this.subtleCrypto.importKey(
+                keyFormat,
+                secretBuf,
+                importAlgorithm,
+                false,
+                ['sign']
+            )
+        } catch (e) {
+            console.error(`JWT.sign(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm)}`);
+            console.error(e);
+            throw e;
+        }
+
         let messageAsUint8Array = Utils.utf8ToUint8Array(partialToken);
 
-        let signature = await this.subtleCrypto.sign(
-            importAlgorithm.name,
-            key,
-            messageAsUint8Array
-        );
+        let signature : ArrayBuffer;
+        
+        try {
+            signature = await this.subtleCrypto.sign(
+                importAlgorithm.name,
+                key,
+                messageAsUint8Array
+            );
+        } catch (e) {
+            console.error(`JWT.sign(): Caught error while signing token:`);
+            console.error(e);
+            throw e;
+        }
 
         // TODO Test
         let signatureAsBase64 = Base64URL.stringify(new Uint8Array(signature));
-        let token = partialToken + '.' + signatureAsBase64;
+        let token = `${partialToken}.${signatureAsBase64}`;
 
         return token;
     };

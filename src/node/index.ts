@@ -1,5 +1,6 @@
 import { JWT, EncodeOptions, Token, DecodeOptions } from "../common/interface";
 import * as jsonwebtoken from 'jsonwebtoken';
+export * from '../common';
 
 export class NodeJWT implements JWT {
     async encode(claims: Record<string, any>, options: EncodeOptions): Promise<Token> {
