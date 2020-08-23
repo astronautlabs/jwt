@@ -137,7 +137,14 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                     secretOrKey: ES256Fixtures.SAMPLE_PRIVATEKEY_ES256
                 });
 
-                expect(token.string).to.equal('eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyMywiaWF0IjoxNTk4MTgxNDQwfQ.vEfmbIxzeDgW-EPKE6-yJuPNuA2r_4cekk3E77v2JtzXPUyJZvdkV_Pu-_206SljrXEivRm0qZhKErhRynyVXA');
+                try {
+                    let validatedToken = await engine.validate(token.string, { algorithm: 'ES256', secretOrKey: ES256Fixtures.SAMPLE_PUBKEY_ES256 });
+                    expect(validatedToken.claims.iat).to.equal(1598181440);
+                } catch (e) {
+                    console.error(`Caught error during ES256 .sign() test:`);
+                    console.error(e);
+                    throw new Error(`Should be able to validate signed token '${token.string}', caught error: ${e}`);
+                }
             });
         });
     });

@@ -31,11 +31,11 @@ const ALGORITHMS = {
     ES256: {
         importKey: {
             name: 'ECDSA',
-            namedCurve: 'P-256',
-            hash: 'SHA-256'
+            namedCurve: 'P-256'
         },
         operation: {
             name: 'ECDSA',
+            namedCurve: 'P-256',
             hash: 'SHA-256'
         }
     }
@@ -143,8 +143,16 @@ export class WebCryptoJWT implements JWTEngine {
                 ['verify']
             );
         } catch (e) {
-            console.error(`JWT.verify(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm)}`);
+            let identifier = `jwtUncaughtError${Math.floor(10000 + Math.random() * 10000)}`;
+
+            console.error(`JWT.verify(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm.importKey)}.`);
             console.error(e);
+
+            if (typeof window !== 'undefined') {
+                window[identifier] = e; 
+                console.error(`To aid in debugging, this error was saved to ${identifier}`);
+            }
+
             throw e;
         }
 
@@ -214,7 +222,7 @@ export class WebCryptoJWT implements JWTEngine {
                 ['sign']
             )
         } catch (e) {
-            console.error(`JWT.sign(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm)}`);
+            console.error(`JWT.sign(): Caught error while importing ${alg} key: format=${keyFormat}, importAlgorithm: ${JSON.stringify(importAlgorithm.importKey)}`);
             console.error(e);
             throw e;
         }

@@ -16,10 +16,19 @@ export class NodeJWT implements JWTEngine {
     }
 
     async validate(string : string, options: DecodeOptions): Promise<Token> {
-        let claims = <Record<string,any>>jsonwebtoken.verify(string, options.secretOrKey, {
-            algorithms: [ <any>options.algorithm ]
-        });
+        let claims : Record<string,any>;
         
+        try {
+            claims = <Record<string,any>>jsonwebtoken.verify(string, options.secretOrKey, {
+                algorithms: [ <any>options.algorithm ]
+            });
+        } catch (e) {
+            if (e.message === 'invalid signature')      // For uniformity
+                throw new Error(`Invalid signature`);
+
+            throw e;
+        }
+
         return {
             string,
             claims

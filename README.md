@@ -51,3 +51,4 @@ try {
 # Supported Algorithms
 - `RS256`
 - `HS256`
+- `ES256`
