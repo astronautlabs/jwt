@@ -87,35 +87,14 @@ EZFf9T6VsMw+7sUFo88gTDL9BK6IBcsYDr5I7QfN5WkXbsrx/s9Yll7urISU3z7o
 eUhPf0cYfvNPR4eQb5FLLrDX
 -----END PRIVATE KEY-----`;
 
-export function engineTest(engine : JWT) {
+export function engineTest(subjectName : string, engine : JWT) {
     suite(describe => {
-        describe('WebCryptoJWT', it => {
-            describe(': Algorithm=none', it => {
-                it('can verify a token', async () => {
-                    let token = await engine.validate(SAMPLE_TOKEN_HS256, { algorithm: 'none' });
-                    expect(token.claims.sub).to.eql("1234567890");
-                    expect(token.claims.iat).to.eql(1516239022);
-                });
-                it('cannot detect forgery on a token', async () => {
-                    let token = await engine.validate(SAMPLE_TOKEN_HS256_INVALID, { algorithm: 'none' });
-                    expect(token.claims.sub).to.eql("1234567890");
-                    expect(token.claims.iat).to.eql(1516239022);
-                });
-                it('can sign a token', async () => {
-                    let token = await engine.encode({
-                        foo: '123'
-                    }, {
-                        algorithm: 'none'
-                    });
-
-                    expect(token.string).to.eql('eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJmb28iOiIxMjMifQ.');
-                });
-            });
+        describe(subjectName, it => {
             describe(': Algorithm=HS256', it => {
                 it('can verify a token', async () => {
                     let token = await engine.validate(SAMPLE_TOKEN_HS256, { algorithm: 'HS256', secretOrKey: SAMPLE_KEY_HS256 });
-                    expect(token.claims.sub).to.eql("1234567890");
-                    expect(token.claims.iat).to.eql(1516239022);
+                    expect(token.claims.sub).to.equal("1234567890");
+                    expect(token.claims.iat).to.equal(1516239022);
                 });
                 it('can detect a forged token', async () => {
                     try {
@@ -137,13 +116,14 @@ export function engineTest(engine : JWT) {
                 });
                 it('can sign a token', async () => {
                     let token = await engine.encode({
-                        foo: 123
+                        foo: 123,
+                        iat: 1598181440
                     }, {
                         algorithm: 'HS256',
                         secretOrKey: SAMPLE_KEY_HS256
                     });
 
-                    expect(token.string).to.eql('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyM30.4d4qMPosQn2C8AxOrOJivbSgnwh7TZyLBZYJrHiEpvU');
+                    expect(token.string).to.equal('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyMywiaWF0IjoxNTk4MTgxNDQwfQ.OCTm-w6hW7tIlVmTPNmj1oqccA5DHkJPX-6gA1-EBJQ');
                 });
             });
 
@@ -156,8 +136,8 @@ export function engineTest(engine : JWT) {
                             secretOrKey: SAMPLE_PUBKEY_RS256 
                         }
                     );
-                    expect(token.claims.sub).to.eql("1234567890");
-                    expect(token.claims.iat).to.eql(1516239022);
+                    expect(token.claims.sub).to.equal("1234567890");
+                    expect(token.claims.iat).to.equal(1516239022);
                 });
                 it('can detect a forged token', async () => {
                     try {
@@ -179,13 +159,14 @@ export function engineTest(engine : JWT) {
                 });
                 it('can sign a token', async () => {
                     let token = await engine.encode({
-                        foo: 123
+                        foo: 123,
+                        iat: 1598181440
                     }, {
                         algorithm: 'RS256',
                         secretOrKey: SAMPLE_PRIVATEKEY_RS256
                     });
 
-                    expect(token.string).to.eql('eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyM30.QWIrOTaDHjrRkVn4SZ_vZx0lbYmaakExKProS0vOvLVJ-ItUs6N_M9mX3jaITVYbfUnUWvPRm5Q9QN4jM__uQYjrIsJOeLzdTGqugnDph8g8WroLOITLjDLdSzFdkfRwYCChWzvaYYWYmGGYApfVJ-NKQxyrrofdbwzhYY_MWzCeJE3VZp7T7d7DmEmuTxvsIDA1sTxyQt-A-9lndwugA1Fk2fElHcS1ynm07oO2zKO4VtHu3ejN2A48uD2nzFcxqG7Cigygw2c7TVgNw8JM3F-dYn96h6uMMh0Ug42kLVGIF9E1KJGX93-cEUPk-P3QkDPg3Rt7eGj0tru8-ad_sA');
+                    expect(token.string).to.equal('eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyMywiaWF0IjoxNTk4MTgxNDQwfQ.dxtIlvdoi5UqDiqOOJa7zgMbE3u3_uscCXUO3mk3xW1qg-B6rH41hLi22ITxV6CLQhqNlG8HAMI4s3FIkuSpVNo7ghyL0razENh-hgYQLD7CslwDG17f7BWRFF6SI5wuN-MSE4c7ul9GBjHYQxOmJzFQ97WUvCShxcC3511tJYOGaMM-lf6FVTWrM8LQr1BtDgKN37AceGtbsV2LpemR-a3Nj7F5VZiEP9s7zqEGnGEKfm1SJqEvXr7IbvVIpfdCrWjVRJ_dFKfPZ9RLoHpvLXd-HxyxiuYp1-A9q6Tzwv9xYrWtSrCVKNdL4RPXGk8t6RCnLgM01iHHprSw8XS17Q');
                 });
             });
         });
