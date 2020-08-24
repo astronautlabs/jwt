@@ -15,6 +15,7 @@ export = function (config : karma.Config) {
         },
         plugins: [
             'karma-webpack',
+            'karma-material-reporter',
             'karma-sourcemap-loader',
             'karma-chrome-launcher'
         ],
@@ -45,6 +46,11 @@ export = function (config : karma.Config) {
               extensions: [ '.ts', '.js' ],
             },
         },
+
+        reporters: [
+            'progress', 
+            //'material'
+        ],
 
         webpackMiddleware: {
             stats: 'errors-only',
