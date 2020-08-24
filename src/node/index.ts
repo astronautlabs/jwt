@@ -1,6 +1,7 @@
 import { JWTEngine, EncodeOptions, Token, DecodeOptions } from "../common/interface";
 import * as jsonwebtoken from 'jsonwebtoken';
 import { Base64URL } from "../browser/base64url";
+import { validateExpiry } from "../common";
 export * from '../common';
 
 export class NodeJWT implements JWTEngine {
@@ -24,9 +25,17 @@ export class NodeJWT implements JWTEngine {
             });
         } catch (e) {
             if (e.message === 'invalid signature')      // For uniformity
-                throw new Error(`Invalid signature`);
+                throw new Error(`Cannot validate JWT '${string}': Invalid signature`);
+            else if (e.message === 'invalid algorithm')
+                throw new Error(`Cannot validate JWT '${string}': Token has incorrect algorithm`);
 
             throw e;
+        }
+
+        try {
+            validateExpiry(claims.exp, options.now, options.validate?.exp);
+        } catch (e) {
+            throw new Error(`Cannot validate JWT '${string}': ${e.message}`);
         }
 
         return {

@@ -5,6 +5,7 @@
 import { JWTEngine, EncodeOptions, Token, DecodeOptions, Options, DecodedToken } from "../common/interface";
 import { Base64URL } from "./base64url";
 import { Utils } from "./utils";
+import { validateExpiry } from "../node";
 
 const ALGORITHMS = {
     none: {},
@@ -70,10 +71,26 @@ export class WebCryptoJWT implements JWTEngine {
         let decodedToken = this._decode(string);
         let algorithm = this.algorithmOf(options);
         let secretOrKey = options.secretOrKey;
+        let claims = decodedToken.payload;
+
+        // Signature must match
+
+        if (decodedToken.header.alg !== algorithm)
+            throw new Error(`Cannot validate JWT '${string}': Token has incorrect algorithm`);
 
         if (algorithm !== 'none' && !(await this._verify(decodedToken, secretOrKey, algorithm)))
             throw new Error(`Cannot validate JWT '${string}': Invalid signature`);
 
+        // Algorithm must match
+
+        // Expiration
+
+        try {
+            validateExpiry(claims.exp, options.now, options.validate?.exp);
+        } catch (e) {
+            throw new Error(`Cannot validate JWT '${string}': ${e.message}`);
+        }
+    
         return {
             string,
             claims: decodedToken.payload
