@@ -13,7 +13,6 @@ export interface EncodeOptions extends Options {
 }
 
 export interface DecodeOptions extends Options {
-    whenInvalid? : 'throw' | 'null';
     validate?: ValidateOptions;
 }
 
