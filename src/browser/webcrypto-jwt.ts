@@ -19,6 +19,26 @@ const ALGORITHMS = {
             hash: 'SHA-256'
         }
     },
+    HS384: {
+        importKey: { 
+            name: 'HMAC',
+            hash: 'SHA-384'
+        },
+        operation: {
+            name: 'HMAC',
+            hash: 'SHA-384'
+        }
+    },
+    HS512: {
+        importKey: { 
+            name: 'HMAC',
+            hash: 'SHA-512'
+        },
+        operation: {
+            name: 'HMAC',
+            hash: 'SHA-512'
+        }
+    },
     RS256: {
         importKey: {
             name: 'RSASSA-PKCS1-v1_5',

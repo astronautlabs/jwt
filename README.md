@@ -99,6 +99,8 @@ of `options.validate.exp = 'ignore'`.
 - **Node.js**
 
 # Supported Algorithms
-- `RS256`
 - `HS256`
+- `HS384`
+- `HS512`
+- `RS256`
 - `ES256`

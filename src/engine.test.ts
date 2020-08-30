@@ -4,6 +4,25 @@ import { JWTEngine, DecodeOptions } from './common';
 import * as RS256Fixtures from './fixtures/rs256.fixture';
 import * as ES256Fixtures from './fixtures/es256.fixture';
 import * as HS256Fixtures from './fixtures/hs256.fixture';
+import * as HS384Fixtures from './fixtures/hs384.fixture';
+import * as HS512Fixtures from './fixtures/hs512.fixture';
+
+export interface AlgorithmFixtures {
+    SAMPLE_PUBKEY : string;
+    SAMPLE_PRIVATEKEY : string;
+    SAMPLE_TOKEN : string;
+    SAMPLE_TOKEN_INVALID : string;
+    SAMPLE_PUBKEY_2 : string;
+    SAMPLE_PRIVATEKEY_2 : string;
+}
+
+const ALGORITHMS = {
+    HS256: HS256Fixtures,
+    HS384: HS384Fixtures,
+    HS512: HS512Fixtures,
+    RS256: RS256Fixtures,
+    ES256: ES256Fixtures,    
+};
 
 export function engineTest(subjectName : string, engine : JWTEngine) {
     suite(describe => {
@@ -12,7 +31,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                 describe(': alg', it => {
                     it('rejects tokens with the wrong algorithm', async () => {
                         try {
-                            await engine.validate(HS256Fixtures.SAMPLE_TOKEN_HS256, { algorithm: 'RS256', secretOrKey: RS256Fixtures.SAMPLE_PUBKEY_RS256 })
+                            await engine.validate(HS256Fixtures.SAMPLE_TOKEN, { algorithm: 'RS256', secretOrKey: RS256Fixtures.SAMPLE_PUBKEY })
                         } catch (e) {
                             expect(e.message).to.contain('Token has incorrect algorithm');
                             return;
@@ -24,7 +43,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
 
                 describe(': exp', it => {
                     it('rejects expired tokens by default', async () => {
-                        let options = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256 };
+                        let options = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY };
                         let token = await engine.encode({ exp: Date.now() - 1000 }, options);
 
                         try {
@@ -38,7 +57,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                     });
 
                     it('rejects expired tokens with validate.exp=force', async () => {
-                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256, validate: { exp: 'force' } };
+                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'force' } };
                         let token = await engine.encode({ exp: Date.now() - 1000 }, options);
 
                         try {
@@ -52,7 +71,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                     });
 
                     it('accepts fresh tokens with validate.exp=force', async () => {
-                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256, validate: { exp: 'force' } };
+                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'force' } };
                         let token = await engine.encode({ sub: 'abcdef', exp: Date.now() + 10000 }, options);
 
                         let validatedToken = await engine.validate(token.string, options)
@@ -60,7 +79,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                     });
 
                     it('rejects tokens without exp claim when configured to do so', async () => {
-                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256, validate: { exp: 'force' } };
+                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'force' } };
                         let token = await engine.encode({ sub: 'abcdef' }, options);
 
                         try {
@@ -74,149 +93,79 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                     });
 
                     it('accepts expired tokens when configured to do so', async () => {
-                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256, validate: { exp: 'ignore' } };
+                        let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'ignore' } };
                         let token = await engine.encode({ sub: 'abcdef', exp: Date.now() - 1000 }, options);
                         let validatedToken = await engine.validate(token.string, options);
                         expect(validatedToken.claims.sub).to.equal('abcdef');
                     });
                 });
             });
-            describe(': Algorithm=HS256', it => {
-                
-                it('can verify a token', async () => {
-                    let token = await engine.validate(HS256Fixtures.SAMPLE_TOKEN_HS256, { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256 });
-                    expect(token.claims.sub).to.equal("1234567890");
-                    expect(token.claims.iat).to.equal(1516239022);
-                });
-                it('can detect a forged token', async () => {
-                    try {
-                        await engine.validate(HS256Fixtures.SAMPLE_TOKEN_HS256_INVALID, { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256 });
-                    } catch (e) {
-                        expect(e.message).to.contain('Invalid signature');
-                        return;
-                    }
 
-                    throw new Error('Engine should have detected forgery');
-                });
-                it('fails to verify a token with wrong key', async () => {
-                    try {
-                        await engine.validate(HS256Fixtures.SAMPLE_TOKEN_HS256_INVALID, { algorithm: 'HS256', secretOrKey: 'wrong-key' });
-                    } catch (e) {
-                        expect(e.message).to.contain('Invalid signature');
-                        return;
-                    }
+            Object.keys(ALGORITHMS).forEach(alg => testAlgorithm(alg, ALGORITHMS[alg]));
 
-                    throw new Error('Engine should have failed to verify');
-                });
-                it('can sign a token', async () => {
-                    let token = await engine.encode({
-                        foo: 123,
-                        iat: 1598181440
-                    }, {
-                        algorithm: 'HS256',
-                        secretOrKey: HS256Fixtures.SAMPLE_KEY_HS256
+            function testAlgorithm(algorithm : string, fixtures : AlgorithmFixtures) {
+                describe(`: Algorithm=${algorithm}`, async () => {
+                    it('can verify a token', async () => {
+                        let token = await engine.validate(
+                            fixtures.SAMPLE_TOKEN, 
+                            { 
+                                algorithm, 
+                                secretOrKey: fixtures.SAMPLE_PUBKEY 
+                            }
+                        );
+                        expect(token.claims.sub).to.equal("1234567890");
+                        expect(token.claims.iat).to.equal(1516239022);
                     });
-
-                    expect(token.string).to.equal('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyMywiaWF0IjoxNTk4MTgxNDQwfQ.OCTm-w6hW7tIlVmTPNmj1oqccA5DHkJPX-6gA1-EBJQ');
-                });
-            });
-
-            describe(': Algorithm=RS256', it => {
-                it('can verify a token', async () => {
-                    let token = await engine.validate(
-                        RS256Fixtures.SAMPLE_TOKEN_RS256, 
-                        { 
-                            algorithm: 'RS256', 
-                            secretOrKey: RS256Fixtures.SAMPLE_PUBKEY_RS256 
+                    it('can detect a forged token', async () => {
+                        try {
+                            await engine.validate(fixtures.SAMPLE_TOKEN_INVALID, { 
+                                algorithm, 
+                                secretOrKey: fixtures.SAMPLE_PUBKEY 
+                            });
+                        } catch (e) {
+                            expect(e.message).to.contain('Invalid signature');
+                            return;
                         }
-                    );
-                    expect(token.claims.sub).to.equal("1234567890");
-                    expect(token.claims.iat).to.equal(1516239022);
-                });
-                it('can detect a forged token', async () => {
-                    try {
-                        await engine.validate(RS256Fixtures.SAMPLE_TOKEN_RS256_INVALID, { algorithm: 'RS256', secretOrKey: RS256Fixtures.SAMPLE_PUBKEY_RS256 });
-                    } catch (e) {
-                        expect(e.message).to.contain('Invalid signature');
-                        return;
-                    }
-
-                    throw new Error('Engine should have detected forgery');
-                });
-                it('fails to verify a token with wrong key', async () => {
-                    try {
-                        await engine.validate(RS256Fixtures.SAMPLE_TOKEN_RS256_INVALID, { algorithm: 'RS256', secretOrKey: RS256Fixtures.SAMPLE_PUBKEY_RS256_2 });
-                    } catch (e) {
-                        expect(e.message).to.contain('Invalid signature');
-                        return;
-                    }
-
-                    throw new Error('Engine should have failed to verify');
-                });
-                it('can sign a token', async () => {
-                    let token = await engine.encode({
-                        foo: 123,
-                        iat: 1598181440
-                    }, {
-                        algorithm: 'RS256',
-                        secretOrKey: RS256Fixtures.SAMPLE_PRIVATEKEY_RS256
+    
+                        throw new Error('Engine should have detected forgery');
                     });
-
-                    expect(token.string).to.equal('eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOjEyMywiaWF0IjoxNTk4MTgxNDQwfQ.dxtIlvdoi5UqDiqOOJa7zgMbE3u3_uscCXUO3mk3xW1qg-B6rH41hLi22ITxV6CLQhqNlG8HAMI4s3FIkuSpVNo7ghyL0razENh-hgYQLD7CslwDG17f7BWRFF6SI5wuN-MSE4c7ul9GBjHYQxOmJzFQ97WUvCShxcC3511tJYOGaMM-lf6FVTWrM8LQr1BtDgKN37AceGtbsV2LpemR-a3Nj7F5VZiEP9s7zqEGnGEKfm1SJqEvXr7IbvVIpfdCrWjVRJ_dFKfPZ9RLoHpvLXd-HxyxiuYp1-A9q6Tzwv9xYrWtSrCVKNdL4RPXGk8t6RCnLgM01iHHprSw8XS17Q');
+                    it('fails to verify a token with wrong key', async () => {
+                        try {
+                            await engine.validate(fixtures.SAMPLE_TOKEN_INVALID, { 
+                                algorithm, 
+                                secretOrKey: fixtures.SAMPLE_PUBKEY_2
+                            });
+                        } catch (e) {
+                            expect(e.message).to.contain('Invalid signature');
+                            return;
+                        }
+    
+                        throw new Error('Engine should have failed to verify');
+                    });
+                    it('can sign a token', async () => {
+                        let token = await engine.encode({
+                            foo: 123,
+                            iat: 1598181440
+                        }, {
+                            algorithm,
+                            secretOrKey: fixtures.SAMPLE_PRIVATEKEY
+                        });
+    
+                        try {
+                            let validatedToken = await engine.validate(token.string, { 
+                                algorithm, 
+                                secretOrKey: fixtures.SAMPLE_PUBKEY 
+                            });
+                            expect(validatedToken.claims.iat).to.equal(1598181440);
+                        } catch (e) {
+                            console.error(`Caught error during .sign() test:`);
+                            console.error(e);
+                            throw new Error(`Should be able to validate signed token '${token.string}', caught error: ${e}`);
+                        }
+                    });
                 });
-            });
-        });
-        
-        describe(': Algorithm=ES256', it => {
-            it('can verify a token', async () => {
-                let token = await engine.validate(
-                    ES256Fixtures.SAMPLE_TOKEN_ES256, 
-                    { 
-                        algorithm: 'ES256', 
-                        secretOrKey: ES256Fixtures.SAMPLE_PUBKEY_ES256 
-                    }
-                );
-                expect(token.claims.sub).to.equal("1234567890");
-                expect(token.claims.iat).to.equal(1516239022);
-            });
-            it('can detect a forged token', async () => {
-                try {
-                    await engine.validate(ES256Fixtures.SAMPLE_TOKEN_ES256_INVALID, { algorithm: 'ES256', secretOrKey: ES256Fixtures.SAMPLE_PUBKEY_ES256 });
-                } catch (e) {
-                    expect(e.message).to.contain('Invalid signature');
-                    return;
-                }
+            }
 
-                throw new Error('Engine should have detected forgery');
-            });
-            it('fails to verify a token with wrong key', async () => {
-                try {
-                    await engine.validate(ES256Fixtures.SAMPLE_TOKEN_ES256_INVALID, { algorithm: 'ES256', secretOrKey: ES256Fixtures.SAMPLE_PUBKEY_ES256_2 });
-                } catch (e) {
-                    expect(e.message).to.contain('Invalid signature');
-                    return;
-                }
-
-                throw new Error('Engine should have failed to verify');
-            });
-            it('can sign a token', async () => {
-                let token = await engine.encode({
-                    foo: 123,
-                    iat: 1598181440
-                }, {
-                    algorithm: 'ES256',
-                    secretOrKey: ES256Fixtures.SAMPLE_PRIVATEKEY_ES256
-                });
-
-                try {
-                    let validatedToken = await engine.validate(token.string, { algorithm: 'ES256', secretOrKey: ES256Fixtures.SAMPLE_PUBKEY_ES256 });
-                    expect(validatedToken.claims.iat).to.equal(1598181440);
-                } catch (e) {
-                    console.error(`Caught error during ES256 .sign() test:`);
-                    console.error(e);
-                    throw new Error(`Should be able to validate signed token '${token.string}', caught error: ${e}`);
-                }
-            });
         });
     });
 }
