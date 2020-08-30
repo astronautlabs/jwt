@@ -10,7 +10,7 @@
     "test:node": "npm run build && node dist/test",
     "test:browser": "karma start --single-run",
     "karma": "karma start",
-    "prepublish": "npm run test"
+    "prepare": "npm run test"
   },
   "author": "",
   "license": "MIT",
