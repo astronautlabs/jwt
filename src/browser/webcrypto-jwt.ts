@@ -49,6 +49,16 @@ const ALGORITHMS = {
             hash: 'SHA-256'
         }
     },
+    RS512: {
+        importKey: {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: 'SHA-512'
+        },
+        operation: {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: 'SHA-512'
+        }
+    },
     ES256: {
         importKey: {
             name: 'ECDSA',

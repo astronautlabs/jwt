@@ -2,6 +2,7 @@ import { suite } from 'razmin';
 import { expect } from 'chai';
 import { JWTEngine, DecodeOptions } from './common';
 import * as RS256Fixtures from './fixtures/rs256.fixture';
+import * as RS512Fixtures from './fixtures/rs512.fixture';
 import * as ES256Fixtures from './fixtures/es256.fixture';
 import * as HS256Fixtures from './fixtures/hs256.fixture';
 import * as HS384Fixtures from './fixtures/hs384.fixture';
@@ -21,6 +22,7 @@ const ALGORITHMS = {
     HS384: HS384Fixtures,
     HS512: HS512Fixtures,
     RS256: RS256Fixtures,
+    RS512: RS512Fixtures,
     ES256: ES256Fixtures,    
 };
 

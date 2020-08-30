@@ -103,4 +103,5 @@ of `options.validate.exp = 'ignore'`.
 - `HS384`
 - `HS512`
 - `RS256`
+- `RS512`
 - `ES256`
