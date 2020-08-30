@@ -5,7 +5,7 @@
 import { JWTEngine, EncodeOptions, Token, DecodeOptions, Options, DecodedToken } from "../common/interface";
 import { Base64URL } from "./base64url";
 import { Utils } from "./utils";
-import { validateExpiry } from "../node";
+import { validateExpiry } from "../common";
 
 const ALGORITHMS = {
     none: {},
