@@ -12,7 +12,10 @@
     "karma": "karma start",
     "prepare": "npm run test"
   },
-  "author": "",
+  "author": {
+    "name": "Astronaut Labs, LLC",
+    "url": "https://astronautlabs.com/"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.12",
