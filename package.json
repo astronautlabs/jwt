@@ -10,7 +10,7 @@
     "test:node": "npm run build && node dist/test",
     "test:browser": "karma start --single-run",
     "karma": "karma start",
-    "prepare": "npm run test"
+    "prepublishOnly": "npm run test"
   },
   "author": {
     "name": "Astronaut Labs, LLC",
