@@ -80,6 +80,11 @@ export class WebCryptoJWT implements JWTEngine {
             this.findSubtleCrypto();
     }
 
+    async decodeUntrusted(token: string): Promise<Token> {
+        let decodedToken = this._decode(token);
+        return { claims: decodedToken.payload, string: token };
+    }
+
     private findSubtleCrypto() {
         if ('crypto' in window)
             this.subtleCrypto = crypto.subtle || crypto['webkitSubtle'];

@@ -5,6 +5,11 @@ import { validateExpiry } from "../common";
 export * from '../common';
 
 export class NodeJWT implements JWTEngine {
+    async decodeUntrusted(token: string): Promise<Token> {
+        let decodedToken = <Record<string,any>>jsonwebtoken.decode(token);
+        return { claims: decodedToken, string: token };
+    }
+
     async encode(claims: Record<string, any>, options: EncodeOptions): Promise<Token> {
         let string = jsonwebtoken.sign(claims, options.secretOrKey, {
             algorithm: <any>options.algorithm

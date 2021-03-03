@@ -43,4 +43,5 @@ export interface DecodedToken {
 export interface JWTEngine {
     encode(claims : Record<string,any>, options : EncodeOptions) : Promise<Token>;
     validate(token : string, options : DecodeOptions) : Promise<Token>;
+    decodeUntrusted(token : string) : Promise<Token>;
 }
