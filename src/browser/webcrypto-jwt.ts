@@ -90,8 +90,6 @@ export class WebCryptoJWT implements JWTEngine {
             this.subtleCrypto = crypto.subtle || crypto['webkitSubtle'];
         if (!this.subtleCrypto && 'msCrypto' in window)
             this.subtleCrypto = window['msCrypto'].Subtle;
-        if (!this.subtleCrypto)
-            throw new Error(`Not supported: No Subtle Crypto support`);
     }
 
 
@@ -186,6 +184,9 @@ export class WebCryptoJWT implements JWTEngine {
 
         let key : CryptoKey;
         
+        if (!this.subtleCrypto)
+            throw new Error(`Not supported: No Subtle Crypto support`);
+
         try {
             key = await this.subtleCrypto.importKey(
                 keyFormat,
@@ -216,6 +217,9 @@ export class WebCryptoJWT implements JWTEngine {
         // TODO Test utf8ToUint8Array function
         let signatureAsUint8Array = Base64URL.parse(signaturePart);
         
+        if (!this.subtleCrypto)
+            throw new Error(`Not supported: No Subtle Crypto support`);
+
         try {
             return await this.subtleCrypto.verify(
                 importAlgorithm.operation,
@@ -263,6 +267,10 @@ export class WebCryptoJWT implements JWTEngine {
             secretBuf = encoder.encode(secret);
         }
 
+        
+        if (!this.subtleCrypto)
+            throw new Error(`Not supported: No Subtle Crypto support`);
+
         let key : CryptoKey;
         
         try {
@@ -281,6 +289,10 @@ export class WebCryptoJWT implements JWTEngine {
 
         let messageAsUint8Array = Utils.utf8ToUint8Array(partialToken);
 
+        
+        if (!this.subtleCrypto)
+            throw new Error(`Not supported: No Subtle Crypto support`);
+            
         let signature : ArrayBuffer;
         
         try {
