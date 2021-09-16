@@ -26,7 +26,8 @@ export class NodeJWT implements JWTEngine {
         
         try {
             claims = <Record<string,any>>jsonwebtoken.verify(string, options.secretOrKey, {
-                algorithms: [ <any>options.algorithm ]
+                algorithms: [ <any>options.algorithm ],
+                ignoreExpiration: true
             });
         } catch (e) {
             if (e.message === 'invalid signature')      // For uniformity

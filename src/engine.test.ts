@@ -46,7 +46,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                 describe(': exp', it => {
                     it('rejects expired tokens by default', async () => {
                         let options = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY };
-                        let token = await engine.encode({ exp: Date.now() - 1000 }, options);
+                        let token = await engine.encode({ exp: (Date.now() - 1000) / 1000 }, options);
 
                         try {
                             await engine.validate(token.string, options)
@@ -60,7 +60,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
 
                     it('rejects expired tokens with validate.exp=force', async () => {
                         let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'force' } };
-                        let token = await engine.encode({ exp: Date.now() - 1000 }, options);
+                        let token = await engine.encode({ exp: (Date.now() - 1000) / 1000 }, options);
 
                         try {
                             await engine.validate(token.string, options)
@@ -74,7 +74,7 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
 
                     it('accepts fresh tokens with validate.exp=force', async () => {
                         let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'force' } };
-                        let token = await engine.encode({ sub: 'abcdef', exp: Date.now() + 10000 }, options);
+                        let token = await engine.encode({ sub: 'abcdef', exp: (Date.now() + 10000) / 1000 }, options);
 
                         let validatedToken = await engine.validate(token.string, options)
                         expect(validatedToken.claims.sub).to.equal('abcdef');
@@ -91,12 +91,12 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
                             return;
                         }
 
-                        throw new Error(`Should not accept an expired token by default`);
+                        throw new Error(`Should not accept a token without exp claim when configured to require it`);
                     });
 
                     it('accepts expired tokens when configured to do so', async () => {
                         let options : DecodeOptions = { algorithm: 'HS256', secretOrKey: HS256Fixtures.SAMPLE_PUBKEY, validate: { exp: 'ignore' } };
-                        let token = await engine.encode({ sub: 'abcdef', exp: Date.now() - 1000 }, options);
+                        let token = await engine.encode({ sub: 'abcdef', exp: (Date.now() - 1000) / 1000 }, options);
                         let validatedToken = await engine.validate(token.string, options);
                         expect(validatedToken.claims.sub).to.equal('abcdef');
                     });

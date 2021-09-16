@@ -16,7 +16,7 @@ export function validateExpiry(exp : number, now : number, policy : 'ignore' | '
 
     if (policy !== 'ignore') {
         if (typeof exp !== 'undefined') {
-            if (exp < now)
+            if (exp * 1000 < now)
                 throw new Error(`Token is expired`);
         } else if (policy === 'force') {
             throw new Error(`Non-expiring tokens are not acceptable`);
