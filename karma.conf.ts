@@ -12,12 +12,6 @@ export = function (config : karma.Config) {
         preprocessors: {
             '**/*.test.ts': ['webpack']
         },
-        plugins: [
-            'karma-webpack',
-            'karma-material-reporter',
-            'karma-sourcemap-loader',
-            'karma-chrome-launcher'
-        ],
         webpack: {
             devtool: 'inline-source-map',
             externals: {
@@ -48,13 +42,7 @@ export = function (config : karma.Config) {
             },
         },
 
-        reporters: [
-            'progress', 
-            //'material'
-        ],
-
-        webpackMiddleware: {
-            stats: 'errors-only',
-        },
+        reporters: [ 'progress' ],
+        webpackMiddleware: { stats: 'errors-only' },
     });
 }
