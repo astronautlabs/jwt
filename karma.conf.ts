@@ -20,6 +20,9 @@ export = function (config : karma.Config) {
         ],
         webpack: {
             devtool: 'inline-source-map',
+            externals: {
+              fs: 'undefined'
+            }, 
             module: {
                 rules: [
                     {
