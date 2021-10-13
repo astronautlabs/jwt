@@ -9,7 +9,6 @@ export = function (config : karma.Config) {
             { pattern: 'src/browser/**/*.test.ts' }
         ],
         browsers: ['Chrome'],
-
         preprocessors: {
             '**/*.test.ts': ['webpack']
         },
@@ -19,7 +18,6 @@ export = function (config : karma.Config) {
             'karma-sourcemap-loader',
             'karma-chrome-launcher'
         ],
-
         webpack: {
             devtool: 'inline-source-map',
             module: {
