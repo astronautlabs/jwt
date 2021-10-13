@@ -31,7 +31,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-typescript": "^5.1.0",
     "karma-webpack": "^4.0.2",
-    "razmin": "^0.6.16",
+    "razmin": "^1.1.5",
     "ts-loader": "^8.0.2",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
