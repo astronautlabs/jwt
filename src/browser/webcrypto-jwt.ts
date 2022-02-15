@@ -158,7 +158,7 @@ export class WebCryptoJWT implements JWTEngine {
         if (!importAlgorithm)
             throw new Error(`Algorithm ${alg} is not supported`);
 
-        let keyFormat : string;
+        let keyFormat : 'raw' | 'spki';
         let secretBuf : ArrayBuffer;
         let encoder = new TextEncoder();
 
@@ -248,7 +248,7 @@ export class WebCryptoJWT implements JWTEngine {
         if (alg === 'none')
             return `${partialToken}.`;
 
-        let keyFormat = 'raw';
+        let keyFormat : 'raw' | 'pkcs8' = 'raw';
         let encoder = new TextEncoder();
         let secretBuf : ArrayBuffer;
 
