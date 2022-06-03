@@ -1,13 +1,37 @@
 import { JWTEngine, EncodeOptions, Token, DecodeOptions } from "../common/interface";
 import * as jsonwebtoken from 'jsonwebtoken';
-import { Base64URL } from "../browser/base64url";
-import { validateExpiry } from "../common";
+import { validateExpiry, DecodedToken } from "../common";
 export * from '../common';
 
 export class NodeJWT implements JWTEngine {
+    /**
+     * A simple decode used to obtain the header since the jsonwebtoken package does not 
+     * expose it. It is not used during the validation or decoding paths for this implementation.
+     * @param token 
+     * @returns 
+     */
+    private _decode(token : string): DecodedToken {
+        let parts = token.split('.');
+        if (parts.length !== 3)
+            throw new Error(`Invalid token '${token}': must have 3 parts separated by '.'`);
+
+        return {
+            encodedHeader: parts[0],
+            encodedPayload: parts[1],
+            signature: parts[2],
+
+            header: JSON.parse(Buffer.from(parts[0], 'base64').toString('utf-8')),
+            payload: JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8')),
+        };
+    };
+
     async decodeUntrusted(token: string): Promise<Token> {
-        let decodedToken = <Record<string,any>>jsonwebtoken.decode(token);
-        return { claims: decodedToken, string: token };
+        let decoded = this._decode(token);
+        return { 
+            claims: decoded.payload,
+            header: decoded.header,
+            string: token
+        };
     }
 
     async encode(claims: Record<string, any>, options: EncodeOptions): Promise<Token> {
@@ -17,6 +41,7 @@ export class NodeJWT implements JWTEngine {
 
         return {
             string,
+            header: this._decode(string).header,
             claims
         }
     }
@@ -46,6 +71,7 @@ export class NodeJWT implements JWTEngine {
 
         return {
             string,
+            header: this._decode(string).header,
             claims
         }
     }

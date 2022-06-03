@@ -82,7 +82,11 @@ export class WebCryptoJWT implements JWTEngine {
 
     async decodeUntrusted(token: string): Promise<Token> {
         let decodedToken = this._decode(token);
-        return { claims: decodedToken.payload, string: token };
+        return {
+            claims: decodedToken.payload, 
+            header: decodedToken.header,
+            string: token 
+        };
     }
 
     private findSubtleCrypto() {
@@ -94,8 +98,10 @@ export class WebCryptoJWT implements JWTEngine {
 
 
     async encode(payload: Record<string, any>, options: EncodeOptions): Promise<Token> {
+        let string = await this._sign(payload, options.secretOrKey, this.algorithmOf(options))
         return {
-            string: await this._sign(payload, options.secretOrKey, this.algorithmOf(options)),
+            string,
+            header: this._decode(string).header,
             claims: payload
         }
     }
@@ -126,6 +132,7 @@ export class WebCryptoJWT implements JWTEngine {
     
         return {
             string,
+            header: decodedToken.header,
             claims: decodedToken.payload
         };
     }

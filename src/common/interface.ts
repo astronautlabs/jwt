@@ -28,6 +28,7 @@ export interface ValidateOptions {
 export interface Token {
     string : string;
     claims : Record<string, any>;
+    header : Record<string, any>;
 }
 
 export interface DecodedToken {
