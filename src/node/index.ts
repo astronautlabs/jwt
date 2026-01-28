@@ -59,6 +59,8 @@ export class NodeJWT implements JWTEngine {
                 throw new Error(`Cannot validate JWT '${string}': Invalid signature`);
             else if (e.message === 'invalid algorithm')
                 throw new Error(`Cannot validate JWT '${string}': Token has incorrect algorithm`);
+            else if (e.message === 'jwt signature is required')
+                throw new Error(`Cannot validate JWT '${string}': Token has incorrect algorithm`);
 
             throw e;
         }

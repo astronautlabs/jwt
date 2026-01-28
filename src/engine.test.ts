@@ -41,6 +41,16 @@ export function engineTest(subjectName : string, engine : JWTEngine) {
 
                         throw new Error(`Should not accept token with incorrect algorithm`);
                     });
+                    it('rejects tokens with the \'none\' algorithm', async () => {
+                        try {
+                            await engine.validate(HS256Fixtures.SAMPLE_TOKEN_NONE, { algorithm: 'RS256', secretOrKey: RS256Fixtures.SAMPLE_PUBKEY })
+                        } catch (e) {
+                            expect(e.message).to.contain('Token has incorrect algorithm');
+                            return;
+                        }
+
+                        throw new Error(`Should not accept token with incorrect algorithm`);
+                    });
                 });
 
                 describe(': exp', it => {
