@@ -1,10 +1,11 @@
 import * as karma from 'karma';
 import * as path from 'path';
 
-export = function (config : karma.Config) {
-    config.set(<karma.ConfigOptions & { webpack }>{
+export default function (config : karma.Config) {
+    config.set(<karma.ConfigOptions & { webpack: any }>{
         basePath: '',
         files: [
+            { pattern: 'src/polyfills.test.ts' },
             { pattern: 'src/*.test.ts' },
             { pattern: 'src/browser/**/*.test.ts' }
         ],
@@ -12,11 +13,17 @@ export = function (config : karma.Config) {
         preprocessors: {
             '**/*.test.ts': ['webpack']
         },
+        frameworks: [
+            'webpack'
+        ],
         webpack: {
             devtool: 'inline-source-map',
             externals: {
               fs: 'undefined'
             }, 
+            output: {
+              path: path.join(__dirname, 'tmp'),
+            },
             module: {
                 rules: [
                     {
@@ -39,6 +46,11 @@ export = function (config : karma.Config) {
             },
             resolve: {
               extensions: [ '.ts', '.js' ],
+              fallback: {
+                "os": require.resolve('os-browserify'),
+                "stream": require.resolve('stream-browserify'),
+                "path": require.resolve('path-browserify')
+              }
             },
         },
 
