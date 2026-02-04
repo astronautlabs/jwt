@@ -93,7 +93,7 @@ export class WebCryptoJWT implements JWTEngine {
         if ('crypto' in window)
             this.subtleCrypto = crypto.subtle || crypto['webkitSubtle'];
         if (!this.subtleCrypto && 'msCrypto' in window)
-            this.subtleCrypto = window['msCrypto'].Subtle;
+            this.subtleCrypto = (window['msCrypto'] as any).Subtle;
     }
 
 
@@ -185,7 +185,7 @@ export class WebCryptoJWT implements JWTEngine {
                 + `openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in pkcs1.key -out pkcs8.key`
             );
         } else {
-            secretBuf = encoder.encode(secret);
+            secretBuf = encoder.encode(secret).buffer;
             keyFormat = 'raw';
         }
 
@@ -271,7 +271,7 @@ export class WebCryptoJWT implements JWTEngine {
             ));
             keyFormat = 'pkcs8';
         } else {
-            secretBuf = encoder.encode(secret);
+            secretBuf = encoder.encode(secret).buffer;
         }
 
         

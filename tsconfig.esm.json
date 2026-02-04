@@ -2,6 +2,6 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "module": "es2022",
-        "outDir": "./distx.esm"
+        "outDir": "./dist.esm"
     }
 }
