@@ -15,6 +15,9 @@
     "karma": "karma start",
     "prepublishOnly": "npm run test"
   },
+  "repository": {
+    "url": "git@github.com:astronautlabs/jwt.git"
+  },
   "author": {
     "name": "Astronaut Labs, LLC",
     "url": "https://astronautlabs.com/"
