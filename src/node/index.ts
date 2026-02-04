@@ -1,5 +1,5 @@
 import { JWTEngine, EncodeOptions, Token, DecodeOptions } from "../common/interface";
-import * as jsonwebtoken from 'jsonwebtoken';
+import jsonwebtoken from 'jsonwebtoken';
 import { validateExpiry, DecodedToken } from "../common";
 export * from '../common';
 
